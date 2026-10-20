@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+
+    <!-- Actual Steam Valheim installation -->
+    <VALHEIM_INSTALL>C:\Program Files (x86)\Steam\steamapps\common\Valheim</VALHEIM_INSTALL>
+
+    <!-- Thunderstore profile's BepInEx directory -->
+    <BEPINEX_PATH>C:\Users\YourUser\AppData\Roaming\Thunderstore Mod Manager\DataFolder\Valheim\profiles\Default\BepInEx</BEPINEX_PATH>
+
+    <!-- Where Visual Studio deploys your mod -->
+    <MOD_DEPLOYPATH>$(BEPINEX_PATH)\plugins\PraetoMaterials</MOD_DEPLOYPATH>
+
+  </PropertyGroup>
+</Project>
