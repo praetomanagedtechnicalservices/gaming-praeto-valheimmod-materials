@@ -1,0 +1,2 @@
+using NUnit.Framework; using SuijinMaterials.Config;
+namespace SuijinMaterials.Tests { [TestFixture] public sealed class MerchantStockConfigTests { [Test] public void Defaults_match_approved_prices_and_stacks(){var x=MerchantStockConfig.CreateDefaultSnapshot();Assert.Multiple(()=>{Assert.That(x.Get("haldor-aged-tissue").Price,Is.EqualTo(240));Assert.That(x.Get("hildir-canvas").Price,Is.EqualTo(60));Assert.That(x.Get("bogwitch-voodoo-doll").Price,Is.EqualTo(500));Assert.That(x.Get("haldor-aged-tissue").Stack,Is.EqualTo(1));});} } }

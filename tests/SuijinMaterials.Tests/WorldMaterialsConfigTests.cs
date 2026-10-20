@@ -1,0 +1,2 @@
+using NUnit.Framework; using SuijinMaterials.Config;
+namespace SuijinMaterials.Tests { [TestFixture] public sealed class WorldMaterialsConfigTests { [Test] public void Defaults_are_conservative_and_backfill_is_off(){var x=WorldMaterialsConfig.CreateDefaultSnapshot();Assert.Multiple(()=>{Assert.That(x.Get("yarrow-meadows").Chance,Is.EqualTo(.35));Assert.That(x.Get("yarrow-meadows").RespawnMinutes,Is.EqualTo(240));Assert.That(x.Get("yggdrasil-branch-roots").EnableBackfill,Is.False);Assert.That(x.Get("yggdrasil-branch-roots").MinimumToolTier,Is.Zero);});} } }

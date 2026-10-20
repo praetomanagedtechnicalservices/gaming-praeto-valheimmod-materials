@@ -1,0 +1,12 @@
+using System; using System.Collections.Generic; using System.Linq; using BepInEx.Configuration; using Jotunn.Extensions; using SuijinMaterials.World;
+namespace SuijinMaterials.Config
+{
+ public sealed class WorldMaterialsConfig
+ {
+  private readonly Dictionary<string,E> entries; private WorldMaterialsConfig(Dictionary<string,E> e){entries=e;}
+  public static WorldMaterialsConfig Bind(ConfigFile c){var d=new Dictionary<string,E>();foreach(var x in WorldMaterialCatalog.All){string s="World - "+x.RuleId;d[x.RuleId]=new E{Enabled=c.BindConfig(s,"Enabled",true,"Server-authoritative world rule.",synced:true),Chance=c.BindConfig(s,"Chance",x.DefaultChance,"Probability from 0 to 1.",synced:true,acceptableValues:new AcceptableValueRange<double>(0,1)),Min=c.BindConfig(s,"Group Minimum",x.DefaultGroupMin,"Minimum group size.",synced:true,acceptableValues:new AcceptableValueRange<int>(1,100)),Max=c.BindConfig(s,"Group Maximum",x.DefaultGroupMax,"Maximum group size.",synced:true,acceptableValues:new AcceptableValueRange<int>(1,100)),Yield=c.BindConfig(s,"Yield",x.DefaultYield,"Items harvested.",synced:true,acceptableValues:new AcceptableValueRange<int>(1,100)),Respawn=c.BindConfig(s,"Respawn Minutes",x.DefaultRespawnMinutes,"Zero means never.",synced:true,acceptableValues:new AcceptableValueRange<double>(0,100000)),Tier=c.BindConfig(s,"Minimum Tool Tier",x.DefaultMinimumToolTier,"Minimum axe tier.",synced:true,acceptableValues:new AcceptableValueRange<int>(0,10)),Backfill=c.BindConfig(s,"Enable Loaded Root Backfill",false,"Backed-up worlds only; scans loaded roots.",synced:true)};}return new WorldMaterialsConfig(d);}
+  public WorldSettingsSnapshot Snapshot(){var d=new Dictionary<string,WorldRuleSettings>();foreach(var p in entries){int min=Math.Max(1,p.Value.Min.Value),max=Math.Max(min,p.Value.Max.Value);d[p.Key]=new WorldRuleSettings(p.Value.Enabled.Value,Math.Max(0,Math.Min(1,p.Value.Chance.Value)),min,max,Math.Max(1,p.Value.Yield.Value),Math.Max(0,p.Value.Respawn.Value),Math.Max(0,p.Value.Tier.Value),p.Value.Backfill.Value);}return new WorldSettingsSnapshot(d);}
+  public static WorldSettingsSnapshot CreateDefaultSnapshot()=>new WorldSettingsSnapshot(WorldMaterialCatalog.All.ToDictionary(x=>x.RuleId,x=>new WorldRuleSettings(true,x.DefaultChance,x.DefaultGroupMin,x.DefaultGroupMax,x.DefaultYield,x.DefaultRespawnMinutes,x.DefaultMinimumToolTier,false)));
+  private sealed class E{public ConfigEntry<bool> Enabled,Backfill;public ConfigEntry<double> Chance,Respawn;public ConfigEntry<int> Min,Max,Yield,Tier;}
+ }
+}
