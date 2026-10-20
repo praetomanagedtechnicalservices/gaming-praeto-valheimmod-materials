@@ -28,11 +28,11 @@ namespace SuijinMaterials.Content
             {
                 Name = definition.NameToken,
                 Description = definition.DescriptionToken,
-                Icon = icon,
-                Enabled = false
+                Icon = icon
             };
 
-            var item = new CustomItem(definition.PrefabId, definition.CloneSourcePrefab, itemConfig);
+            var item = new CustomItem(definition.PrefabId, definition.CloneSourcePrefab);
+            itemConfig.Apply(item.ItemPrefab);
             if (!ItemManager.Instance.AddItem(item))
             {
                 throw new InvalidDataException($"Jötunn rejected custom item '{definition.PrefabId}'.");

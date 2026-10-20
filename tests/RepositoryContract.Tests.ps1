@@ -17,11 +17,13 @@ $solution = Join-Path $repo 'SuijinMaterials.sln'
 $project = Join-Path $repo 'SuijinMaterials\SuijinMaterials.csproj'
 $plugin = Join-Path $repo 'SuijinMaterials\SuijinMaterialsPlugin.cs'
 $manifest = Join-Path $repo 'SuijinMaterials\Package\manifest.json'
+$backend = Join-Path $repo 'SuijinMaterials\Content\JotunnMaterialRegistrationBackend.cs'
 
 Assert-True (Test-Path -LiteralPath $solution) 'SuijinMaterials.sln must exist.'
 Assert-True (Test-Path -LiteralPath $project) 'SuijinMaterials.csproj must exist.'
 Assert-True (Test-Path -LiteralPath $plugin) 'SuijinMaterialsPlugin.cs must exist.'
 Assert-True (Test-Path -LiteralPath $manifest) 'Thunderstore manifest must exist.'
+Assert-True (Test-Path -LiteralPath $backend) 'Jotunn material registration backend must exist.'
 
 $legacyPaths = @(Get-ChildItem -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue |
     Where-Object { $_.FullName -notlike '*\.git\*' -and $_.Name -like '*JotunnModStub*' })
@@ -44,6 +46,13 @@ if (Test-Path -LiteralPath $manifest) {
     Assert-Equal $package.version_number '0.1.0' 'Package version must match the plugin.'
     Assert-True ($package.dependencies -contains 'denikson-BepInExPack_Valheim-5.4.2351') 'Manifest must pin BepInEx 5.4.2351.'
     Assert-True ($package.dependencies -contains 'ValheimModding-Jotunn-2.30.2') 'Manifest must pin Jotunn 2.30.2.'
+}
+
+if (Test-Path -LiteralPath $backend) {
+    $backendSource = Get-Content -Raw -LiteralPath $backend
+    Assert-True ($backendSource -match 'new CustomItem\(definition\.PrefabId,\s*definition\.CloneSourcePrefab\);') 'Registry must use Jotunn''s recipe-free CustomItem clone constructor.'
+    Assert-True ($backendSource -match 'itemConfig\.Apply\(item\.ItemPrefab\);') 'Registry must apply display metadata to the cloned item without creating a recipe.'
+    Assert-True ($backendSource -notmatch 'new CustomItem\(definition\.PrefabId,\s*definition\.CloneSourcePrefab,\s*itemConfig\)') 'Registry must not use the CustomItem overload that creates a recipe.'
 }
 
 if ($failures.Count -gt 0) {
