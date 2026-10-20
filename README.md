@@ -1,6 +1,6 @@
 # SuijinMaterials
 
-> **v0.2 implementation:** The deployable Valheim 1.0 mod registers all 22 custom materials and implements the approved creature, boss, spawner, and targeted loot acquisition rules. World vegetation and merchants remain later milestones.
+> **v0.3 implementation:** The deployable Valheim 1.0 mod registers all 22 custom materials, retains the approved v0.2 loot rules, and adds Meadows Yarrow, Swamp Nightbloom, persistent Yggdrasil Branch nodes, and stock for Haldor, Hildir, and the vanilla Bog Witch.
 
 Build and local setup are documented in [`docs/development.md`](docs/development.md), and verification plus the in-game smoke test are in [`docs/testing.md`](docs/testing.md). The editable blank icon sources are in [`SuijinMaterials/Assets/Icons`](SuijinMaterials/Assets/Icons); preserve their filenames and PNG format when replacing them.
 
@@ -8,7 +8,22 @@ Build and local setup are documented in [`docs/development.md`](docs/development
 
 A standalone BepInEx/Jötunn content mod adding lore-friendly materials, resource nodes, merchant stock, and loot-table adjustments to Valheim. It is the **foundation** for two separate future mods: **Valheim Trinkets** and **Valheim Summons**. This plugin does **not** implement trinket effects, adrenaline mechanics, summons, or new crafting systems.
 
-> **Status:** v0.2 drops and loot implemented for BepInEx 5.4.2351 and Jotunn 2.30.2. Merchant listings, Yarrow, Nightbloom, and Yggdrasil Branch world placement are not implemented in v0.2.
+> **Status:** v0.3 world materials and merchant stock implemented for BepInEx 5.4.2351 and Jotunn 2.30.2. Live in-game smoke testing is still required before public release.
+
+## Implemented v0.3 defaults
+
+All settings are synchronized from the server in `dev.praeto.valheim.materials.cfg`.
+
+| Feature | Default |
+|---|---|
+| Yarrow | Meadows only; 35% zone-placement chance, groups of 1–2, yield 1, 240-minute respawn |
+| Nightbloom | Replaces future Thistle generation in Swamp only, copying the vanilla Thistle placement profile; yield 1, 240-minute respawn |
+| Yggdrasil Branch | 35% deterministic chance per exact allowlisted root, yield 1, any axe tier, never regrows |
+| Haldor | Aged Tissue, 240 coins, unlocked by `defeated_dragon` (Moder) |
+| Hildir | Canvas, 60 coins, no boss gate |
+| Bog Witch | Voodoo Doll, 500 coins, unlocked by `defeated_goblinking` (Yagluth) |
+
+Vegetation appears only in newly generated zones. Existing placed Thistle and inventory Thistle are not rewritten. Loaded-root backfill is disabled by default; back up the world before enabling `World - yggdrasil-branch-roots / Enable Loaded Root Backfill` for a one-time scan of currently loaded roots.
 
 ## Implemented v0.2 defaults
 
@@ -70,10 +85,10 @@ Eligibility must be determined from actual container/location metadata or an exp
 | Merchant | Material | Type | Price | Unlock |
 |---|---|---|---:|---|
 | Haldor | Aged Tissue | NEW | 240 coins | After Moder is defeated |
-| Witch | Voodoo Doll | NEW | 500 coins | After Yagluth is defeated |
+| Bog Witch | Voodoo Doll | NEW | 500 coins | After Yagluth is defeated |
 | Hildir | Canvas | NEW | 60 coins | No boss gate specified |
 
-**Witch** is a proposed/custom merchant unless the target game or installed mod pack supplies one. Do not silently substitute Haldor/Hildir. Merchant unlocks must use the appropriate world progression state and sync to clients. If the Witch does not exist, keep the Voodoo Doll registered but disable its shop listing with a clear configuration warning until an integration is supplied.
+The v0.3 implementation targets the exact vanilla trader prefab `BogWitch`. Merchant unlocks use synchronized world progression keys and all three listings can be enabled, disabled, repriced, or restacked in configuration.
 
 ### Meadows
 
@@ -100,7 +115,7 @@ Eligibility must be determined from actual container/location metadata or an exp
 | Chain | VANILLA | Existing acquisition retained |
 | Nightbloom | NEW | **Replaces Thistle vegetation spawns in Swamp only** |
 | Rotten Elderroot | NEW / ADD | Abomination drop |
-| Runecarved Bone | NEW / ADD | Draugr Elite drop and/or Swamp crypt loot |
+| Runecarved Bone | NEW / ADD | Guaranteed one from exact allowlisted Skeleton spawning piles, including Swamp/crypt variants |
 
 Nightbloom must not change Thistle spawns outside Swamp or remove existing inventory Thistle. Preserve vanilla Thistle's availability elsewhere. For already-generated Swamp zones, document that placement changes may need a world-upgrade pass.
 
@@ -220,8 +235,8 @@ valheim-materials/
 
 - **v0.1.0 – Registry:** Plugin loads, all custom items register, IDs and icons work, inventory items persist after reload.
 - **v0.2.0 – Drops:** Feather conversion, creature drops, boss/spawner drops, and targeted loot-table changes.
-- **v0.3.0 – World:** Yarrow, Nightbloom, and one-time Yggdrasil Branch placement/harvesting.
-- **v0.4.0 – Merchants:** Haldor/Hildir integration, boss unlocks, optional Witch integration.
+- **v0.3.0 – World and merchants:** Yarrow, Nightbloom, one-time Yggdrasil Branch placement/harvesting, and Haldor/Hildir/Bog Witch stock.
+- **v0.4.0 – Future integrations:** Remaining disabled feather sources and later approved content.
 - **v0.5.0 – Multiplayer QA:** Existing-world handling, server authority, config synchronization, regression tests, release packaging.
 
 ## Acceptance tests
@@ -249,12 +264,8 @@ valheim-materials/
 1. Exact game build and pinned BepInEx/Jötunn versions.
 2. Whether Gull, Crow, Ash Crow, and Munin sources exist as actual game prefabs or require separate custom integrations.
 3. How Munin Feather is earned without making Munin killable.
-4. Which Witch merchant mod/plugin, if any, provides the Witch trader.
-5. Exact Mistlands ruin containers and Copper Scrap loot entries to replace.
-6. Which containers qualify as non-dungeon world chests; whether all player-placed containers are excluded (recommended).
-7. Default spawn/drop chances, node yields, merchant stock quantities, and whether Haldor/Hildir inventory is unlimited.
-8. Whether to allow a Silver Crystal-to-Crystal conversion as a vanilla-building fallback.
-9. Which exact Fuling and Dvergr variants are included.
+4. Whether later releases should add an explored-zone vegetation upgrade tool beyond loaded-root backfill.
+5. Whether to allow a Silver Crystal-to-Crystal conversion as a vanilla-building fallback.
 
 ## Compatibility and distribution
 

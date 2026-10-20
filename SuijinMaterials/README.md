@@ -1,6 +1,6 @@
 # SuijinMaterials
 
-SuijinMaterials 0.2 registers 22 lore-friendly materials and adds the approved server-authoritative creature, boss, spawner, and targeted loot acquisition rules. It does not add recipes, merchants, vegetation, or Yggdrasil resource nodes.
+SuijinMaterials 0.3 registers 22 lore-friendly materials, retains the approved server-authoritative v0.2 acquisition rules, and adds Yarrow, Nightbloom, persistent Yggdrasil Branch nodes, and stock for Haldor, Hildir, and the Bog Witch. It does not add recipes.
 
 ## Installation
 
@@ -16,21 +16,28 @@ All multiplayer clients and the dedicated server should use the same mod version
 ## Features
 
 - 22 unique items with stable `praeto_mat_*` prefab IDs.
-- English display names and descriptions.
-- Transparent 64 by 64 placeholder icons stored as ordinary PNG files.
-- Idempotent registration after Valheim's vanilla prefabs are available.
+- Synchronized v0.2 drops and targeted loot rules.
+- Meadows Yarrow and Swamp-only Nightbloom generation in unexplored zones.
+- One-time axe-harvestable Yggdrasil Branch nodes with saved depletion state.
+- Aged Tissue from Haldor for 240 after Moder, Canvas from Hildir for 60, and Voodoo Doll from the Bog Witch for 500 after Yagluth.
 - Strict minor-version network compatibility.
 
 ## Editing the placeholder icons
 
-Edit the PNG files in `SuijinMaterials/Assets/Icons` in the source repository. Keep each filename, image size, and PNG format unchanged, then rebuild or copy the edited `Assets/Icons` directory beside the deployed DLL.
+Edit the transparent 64×64 PNG files in `SuijinMaterials/Assets/Icons` in the source repository. Keep each filename, canvas size, and PNG format unchanged, then rebuild. A Debug build copies them beside the deployed DLL.
 
-## Known limitations
+## Existing worlds and configuration
 
-Gull, Crow, Ash Crow, and Munin Feather acquisition is disabled pending verified source integrations. Existing populated chests are not rewritten.
+Configuration is `BepInEx/config/dev.praeto.valheim.materials.cfg`; server values override clients. Vegetation changes apply only to newly generated zones. Existing placed and inventory Thistle is not rewritten. Loaded-root backfill is disabled by default; back up the world before enabling it for a one-time scan of currently loaded Yggdrasil roots.
+
+Gull, Crow, Ash Crow, and Munin Feather acquisition remains disabled pending verified source integrations. Existing populated chests are not rewritten.
 
 ## Changelog
 
+### 0.3.0
+
+- Added synchronized world placement, persistent Yggdrasil Branch harvesting, and vanilla merchant stock.
+
 ### 0.2.0
 
-- Added synchronized v0.2 drops and targeted loot rules to the 22-material registry.
+- Added synchronized drops and targeted loot rules.

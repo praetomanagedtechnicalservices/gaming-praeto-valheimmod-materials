@@ -43,9 +43,16 @@ if (Test-Path -LiteralPath $project) {
 if (Test-Path -LiteralPath $manifest) {
     $package = Get-Content -Raw -LiteralPath $manifest | ConvertFrom-Json
     Assert-Equal $package.name 'SuijinMaterials' 'Package name must match the mod.'
-    Assert-Equal $package.version_number '0.2.0' 'Package version must match the plugin.'
+    Assert-Equal $package.version_number '0.3.0' 'Package version must match the plugin.'
     Assert-True ($package.dependencies -contains 'denikson-BepInExPack_Valheim-5.4.2351') 'Manifest must pin BepInEx 5.4.2351.'
     Assert-True ($package.dependencies -contains 'ValheimModding-Jotunn-2.30.2') 'Manifest must pin Jotunn 2.30.2.'
+}
+
+if (Test-Path -LiteralPath $plugin) {
+    $pluginSource = Get-Content -Raw -LiteralPath $plugin
+    Assert-True ($pluginSource -match 'PluginVersion\s*=\s*"0\.3\.0"') 'Plugin version must be 0.3.0.'
+    Assert-True ($pluginSource -match 'MerchantStockCoordinator') 'Plugin must activate merchant stock.'
+    Assert-True ($pluginSource -match 'WorldMaterialCoordinator') 'Plugin must activate world materials.'
 }
 
 if (Test-Path -LiteralPath $backend) {

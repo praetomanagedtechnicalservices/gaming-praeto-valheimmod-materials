@@ -24,7 +24,31 @@ Require-Method Destructible Destroy
 Require-Method WearNTear Destroy
 Require-Method DropOnDestroyed OnDestroyed
 Require-Method ZNetView IsOwner
+Require-Method ZNetView Awake
+Require-Method ZNetView GetPrefabName
+Require-Method ZNetView GetZDO
 Require-Method Location GetLocation
+Require-Method WorldGenerator GetSeed
+Require-Method HitData GetTotalPhysicalDamage
+Require-Method ItemDrop DropItem
+Require-Method ZDO GetBool
+Require-Method ZDO GetFloat
+Require-Method ZDO Set
 Require-Field DropOnDestroyed m_dropWhenDestroyed
 Require-Field Container m_inventory
-Write-Host 'Runtime contract passed for Valheim 1.0 acquisition adapters.'
+Require-Field Trader m_items
+Require-Field Pickable m_itemPrefab
+Require-Field Pickable m_amount
+Require-Field Pickable m_respawnTimeMinutes
+Require-Field HitData m_skill
+Require-Field HitData m_toolTier
+
+$jotunnPath = 'C:\Users\carlevaler.PF2Z2J98\.nuget\packages\jotunnlib\2.30.2\lib\net462\Jotunn.dll'
+if (-not (Test-Path -LiteralPath $jotunnPath)) { throw "Jotunn assembly not found: $jotunnPath" }
+$jotunn = [Mono.Cecil.AssemblyDefinition]::ReadAssembly($jotunnPath)
+$zoneManager = $jotunn.MainModule.GetTypes() | Where-Object FullName -eq 'Jotunn.Managers.ZoneManager'
+foreach ($method in 'AddCustomVegetation','GetZoneVegetation','RemoveCustomVegetation') {
+    if (-not ($zoneManager.Methods | Where-Object Name -eq $method)) { throw "Required Jotunn method missing: ZoneManager.$method" }
+}
+
+Write-Host 'Runtime contract passed for Valheim 1.0 v0.2/v0.3 adapters.'

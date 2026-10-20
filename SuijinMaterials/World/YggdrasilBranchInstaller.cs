@@ -14,7 +14,6 @@ namespace SuijinMaterials.World
         };
 
         private readonly Action<string> logError;
-        private readonly HashSet<int> attachedRoots = new HashSet<int>();
         private WorldRuleSettings settings;
 
         public YggdrasilBranchInstaller(Action<string> logError)
@@ -39,12 +38,11 @@ namespace SuijinMaterials.World
         public void Uninstall()
         {
             if (ReferenceEquals(Active, this)) Active = null;
-            foreach (YggdrasilBranchRootWatcher watcher in UnityEngine.Object.FindObjectsOfType<YggdrasilBranchRootWatcher>())
+            foreach (YggdrasilBranchRootWatcher watcher in UnityEngine.Object.FindObjectsByType<YggdrasilBranchRootWatcher>(FindObjectsSortMode.None))
             {
                 watcher.RemoveNode();
                 UnityEngine.Object.Destroy(watcher);
             }
-            attachedRoots.Clear();
             settings = null;
         }
 
@@ -52,7 +50,7 @@ namespace SuijinMaterials.World
         {
             try
             {
-                if (!IsApprovedRoot(view) || !attachedRoots.Add(view.GetInstanceID())) return;
+                if (!IsApprovedRoot(view)) return;
                 YggdrasilBranchRootWatcher watcher = view.GetComponent<YggdrasilBranchRootWatcher>()
                     ?? view.gameObject.AddComponent<YggdrasilBranchRootWatcher>();
                 watcher.Configure(view, this);
@@ -95,7 +93,7 @@ namespace SuijinMaterials.World
 
         private void BackfillLoadedRoots()
         {
-            foreach (ZNetView view in UnityEngine.Object.FindObjectsOfType<ZNetView>()) ObserveRoot(view);
+            foreach (ZNetView view in UnityEngine.Object.FindObjectsByType<ZNetView>(FindObjectsSortMode.None)) ObserveRoot(view);
         }
 
         public static bool IsApprovedRootName(string prefabName)

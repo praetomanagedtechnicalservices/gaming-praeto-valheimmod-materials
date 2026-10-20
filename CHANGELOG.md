@@ -1,15 +1,19 @@
 # Changelog
 
-## 0.2.0 - 2026-10-20
+## 0.3.0 - 2026-10-20
 
-- Added synchronized, server-authoritative acquisition configuration.
-- Added approved creature, Elder boss, Greydwarf nest, and Skeleton spawning-pile drops.
-- Added Hen Feather, Stone Golem Silver Crystal, and Mistlands ruin Gold Scrap replacements.
-- Added 12% one-time Huginn's Feather rolls for eligible natural overworld chests.
-- Kept Gull, Crow, Ash Crow, and Munin Feather acquisition explicitly disabled.
-- Added runtime-contract, rule-engine, eligibility, and idempotency tests.
+- Added Yarrow generation in Meadows with conservative synchronized defaults.
+- Replaced future Swamp Thistle vegetation with Nightbloom while preserving Thistle in every other biome.
+- Added deterministic, axe-harvestable Yggdrasil Branch growths with persistent one-time depletion state.
+- Added Aged Tissue to Haldor after Moder, Canvas to Hildir, and Voodoo Doll to the Bog Witch after Yagluth.
+- Added synchronized world and merchant configuration, idempotent refresh, and ownership-safe teardown.
+- Kept existing-zone mutation disabled by default; vegetation changes apply to newly generated zones.
 
 ## 0.1.0 - 2026-10-20
 
-- Added the Valheim 1.0 plugin scaffold and 22-item material registry.
-- Added English localization and editable transparent placeholder icons.
+- Added a Valheim 1.0-ready BepInEx 5 and Jotunn plugin scaffold.
+- Registered 22 stable Suijin material prefabs cloned from the vanilla Amber item.
+- Added English names and descriptions for every registered material.
+- Added transparent placeholder icons that can be edited without rebuilding code.
+- Added automated catalog, registry, asset, repository, and package contract tests.
+- Added Debug deployment and Thunderstore-style Release packaging.

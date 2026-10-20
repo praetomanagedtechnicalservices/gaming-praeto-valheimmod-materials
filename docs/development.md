@@ -4,9 +4,11 @@
 
 Install Valheim 1.0, BepInEx Pack for Valheim `5.4.2351`, and Jotunn `2.30.2`. Copy `Environment.props.example` to ignored `Environment.props`, set the local paths, then build. Debug deploys to `BepInEx/plugins/SuijinMaterials`; Release creates `SuijinMaterials/bin/Release/net48/SuijinMaterials.zip`.
 
-## v0.2 scope
+## v0.3 architecture
 
-An immutable acquisition catalog feeds a pure rule engine. Harmony adapters target verified Valheim 1.0 methods for character drop generation, final destruction, initial default chest loot, and destroyed-prop drop tables. Runtime decisions require ownership and exact normalized prefab/location allowlists. Merchants, vegetation, Yggdrasil nodes, and third-party integrations are absent.
+The v0.2 acquisition catalog and exact runtime allowlists remain intact. v0.3 adds immutable world and merchant catalogs, synchronized configuration, Jötunn vegetation registration, exact vanilla trader entries, and deterministic root-owned Yggdrasil Branch state stored in versioned ZDO keys. Future vegetation is changed only during zone generation; loaded-root backfill remains opt-in.
+
+Haldor, Hildir, and `BogWitch` entries are object-owned and removed by exact reference during refresh or teardown. Nightbloom removes only the Swamp bit from vanilla Thistle and restores the original mask on teardown. Branch depletion is stored before loot is emitted.
 
 ## Editing icons
 
