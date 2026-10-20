@@ -1,70 +1,79 @@
 param(
-    [Parameter(Mandatory)]
-    [ValidateSet('Debug','Release')]
-    [System.String]$Target,
-    
-    [Parameter(Mandatory)]
-    [System.String]$TargetPath,
-    
-    [Parameter(Mandatory)]
-    [System.String]$TargetAssembly,
-
-    [Parameter(Mandatory)]
-    [System.String]$ValheimPath,
-
-    [Parameter(Mandatory)]
-    [System.String]$ProjectPath,
-    
-    [System.String]$DeployPath
+    [Parameter(Mandatory)] [ValidateSet('Debug', 'Release')] [string]$Target,
+    [Parameter(Mandatory)] [string]$TargetPath,
+    [Parameter(Mandatory)] [string]$TargetAssembly,
+    [Parameter(Mandatory)] [string]$ValheimPath,
+    [Parameter(Mandatory)] [string]$ProjectPath,
+    [string]$DeployPath
 )
 
-# Make sure Get-Location is the script path
-Push-Location -Path (Split-Path -Parent $MyInvocation.MyCommand.Path)
+$ErrorActionPreference = 'Stop'
 
-# Test some preliminaries
-("$TargetPath",
- "$ValheimPath",
- "$(Get-Location)\..\libraries"
-) | % {
-    if (!(Test-Path "$_")) {Write-Error -ErrorAction Stop -Message "$_ folder is missing"}
-}
-
-# Plugin name without ".dll"
-$name = "$TargetAssembly" -Replace('.dll')
-
-# Create the mdb file
-$pdb = "$TargetPath\$name.pdb"
-if (Test-Path -Path "$pdb") {
-    Write-Host "Create mdb file for plugin $name"
-    Invoke-Expression "& `"$(Get-Location)\..\libraries\Debug\pdb2mdb.exe`" `"$TargetPath\$TargetAssembly`""
-}
-
-# Main Script
-Write-Host "Publishing for $Target from $TargetPath"
-
-if ($Target.Equals("Debug")) {
-    if ($DeployPath.Equals("")){
-      $DeployPath = "$ValheimPath\BepInEx\plugins"
+function Copy-IfPresent {
+    param([string]$Source, [string]$Destination)
+    if (Test-Path -LiteralPath $Source) {
+        Copy-Item -LiteralPath $Source -Destination $Destination -Force
     }
-    
-    $plug = New-Item -Type Directory -Path "$DeployPath\$name" -Force
-    Write-Host "Copy $TargetAssembly to $plug"
-    Copy-Item -Path "$TargetPath\$name.dll" -Destination "$plug" -Force
-    Copy-Item -Path "$TargetPath\$name.pdb" -Destination "$plug" -Force
-    Copy-Item -Path "$TargetPath\$name.dll.mdb" -Destination "$plug" -Force
 }
 
-if($Target.Equals("Release")) {
-    Write-Host "Packaging for ThunderStore..."
-    $Package="Package"
-    $PackagePath="$ProjectPath\$Package"
+function Copy-RuntimeFiles {
+    param([string]$Destination, [bool]$IncludeSymbols)
 
-    Write-Host "$PackagePath\$TargetAssembly"
-    New-Item -Type Directory -Path "$PackagePath\plugins" -Force
-    Copy-Item -Path "$TargetPath\$TargetAssembly" -Destination "$PackagePath\plugins\$TargetAssembly" -Force
-    Copy-Item -Path "$ProjectPath\README.md" -Destination "$PackagePath\README.md" -Force
-    Compress-Archive -Path "$PackagePath\*" -DestinationPath "$TargetPath\$name.zip" -Force
+    New-Item -ItemType Directory -Path $Destination -Force | Out-Null
+    Copy-Item -LiteralPath (Join-Path $TargetPath $TargetAssembly) -Destination $Destination -Force
+
+    $name = [IO.Path]::GetFileNameWithoutExtension($TargetAssembly)
+    if ($IncludeSymbols) {
+        Copy-IfPresent (Join-Path $TargetPath "$name.pdb") $Destination
+        Copy-IfPresent (Join-Path $TargetPath "$name.dll.mdb") $Destination
+    }
+
+    $icons = Join-Path $ProjectPath 'Assets\Icons'
+    if (Test-Path -LiteralPath $icons) {
+        $iconDestination = Join-Path $Destination 'Assets\Icons'
+        New-Item -ItemType Directory -Path $iconDestination -Force | Out-Null
+        Copy-Item -Path (Join-Path $icons '*.png') -Destination $iconDestination -Force
+    }
 }
 
-# Pop Location
-Pop-Location
+$name = [IO.Path]::GetFileNameWithoutExtension($TargetAssembly)
+$assemblyPath = Join-Path $TargetPath $TargetAssembly
+if (-not (Test-Path -LiteralPath $assemblyPath)) {
+    throw "Build output is missing: $assemblyPath"
+}
+
+if ($Target -eq 'Debug') {
+    if ([string]::IsNullOrWhiteSpace($DeployPath)) {
+        $DeployPath = Join-Path $ValheimPath 'BepInEx\plugins'
+    }
+    $pluginPath = Join-Path $DeployPath $name
+    $resolvedDeployPath = [IO.Path]::GetFullPath($DeployPath).TrimEnd('\')
+    $resolvedPluginPath = [IO.Path]::GetFullPath($pluginPath)
+    if ($resolvedPluginPath -ne ($resolvedDeployPath + '\' + $name)) {
+        throw "Refusing to clean unexpected deployment path: $resolvedPluginPath"
+    }
+    if (Test-Path -LiteralPath $resolvedPluginPath) {
+        Remove-Item -LiteralPath $resolvedPluginPath -Recurse -Force
+    }
+    Write-Host "Deploying $TargetAssembly and editable assets to $pluginPath"
+    Copy-RuntimeFiles $pluginPath $true
+}
+
+if ($Target -eq 'Release') {
+    $packagePath = [IO.Path]::GetFullPath((Join-Path $ProjectPath 'Package'))
+    $pluginsPath = [IO.Path]::GetFullPath((Join-Path $packagePath 'plugins'))
+    $expectedPluginsPath = $packagePath.TrimEnd('\') + '\plugins'
+    if ($pluginsPath -ne $expectedPluginsPath) {
+        throw "Refusing to clean unexpected package path: $pluginsPath"
+    }
+    if (Test-Path -LiteralPath $pluginsPath) {
+        Remove-Item -LiteralPath $pluginsPath -Recurse -Force
+    }
+    $runtimePath = Join-Path $pluginsPath $name
+    Copy-RuntimeFiles $runtimePath $false
+    Copy-Item -LiteralPath (Join-Path $ProjectPath 'README.md') -Destination (Join-Path $packagePath 'README.md') -Force
+
+    $zipPath = Join-Path $TargetPath "$name.zip"
+    Compress-Archive -Path (Join-Path $packagePath '*') -DestinationPath $zipPath -Force
+    Write-Host "Release package created at $zipPath"
+}

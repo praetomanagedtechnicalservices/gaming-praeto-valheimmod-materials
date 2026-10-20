@@ -1,8 +1,14 @@
-# Valheim Materials
+# SuijinMaterials
+
+> **v0.1 implementation:** The deployable Valheim 1.0 material registry is now implemented. It registers all 22 custom materials below, with stable prefab IDs, English localization, and transparent placeholder icons. Acquisition systems remain roadmap items.
+
+Build and local setup are documented in [`docs/development.md`](docs/development.md), and verification plus the in-game smoke test are in [`docs/testing.md`](docs/testing.md). The editable blank icon sources are in [`SuijinMaterials/Assets/Icons`](SuijinMaterials/Assets/Icons); preserve their filenames and PNG format when replacing them.
+
+## Project scope
 
 A standalone BepInEx/Jötunn content mod adding lore-friendly materials, resource nodes, merchant stock, and loot-table adjustments to Valheim. It is the **foundation** for two separate future mods: **Valheim Trinkets** and **Valheim Summons**. This plugin does **not** implement trinket effects, adrenaline mechanics, summons, or new crafting systems.
 
-> **Status:** Design specification / implementation handoff. Not yet a playable mod. Prefab names, game-version compatibility, and some acquisition details must be verified against the target Valheim build before implementation.
+> **Status:** v0.1 registry implemented for BepInEx 5.4.2351 and Jotunn 2.30.2. The remaining sections describe later milestones and design constraints; they are not claims that those acquisition systems exist in v0.1.
 
 ## Goals
 

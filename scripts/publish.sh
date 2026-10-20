@@ -1,72 +1,75 @@
 #!/bin/sh
+set -eu
 
 target="Debug"
-targetPath="JotunnModStub/bin/$target/net48"
-targetAssembly="JotunnModStub.dll"
+targetPath="SuijinMaterials/bin/$target/net48"
+targetAssembly="SuijinMaterials.dll"
 valheimPath=""
-bepinexPath=""
 deployPath=""
-projectPath="./JotunnModStub"
+projectPath="./SuijinMaterials"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    --target)
-        target="$2"; shift 2 ;;
-    --target-path)
-        targetPath="$2"; shift 2 ;;
-    --target-assembly)
-        targetAssembly="$2"; shift 2 ;;
-    --valheim-path)
-        valheimPath="$2"; shift 2 ;;
-    --bepinex-path)
-        bepinexPath="$2"; shift 2 ;;
-    --deploy-path)
-        deployPath="$2"; shift 2 ;;
-    --project-path)
-        projectPath="$2"; shift 2 ;;
-    *)
-        echo "Warning: Unknown argument $1" >&2; shift ;;
+    --target) target="$2"; shift 2 ;;
+    --target-path) targetPath="$2"; shift 2 ;;
+    --target-assembly) targetAssembly="$2"; shift 2 ;;
+    --valheim-path) valheimPath="$2"; shift 2 ;;
+    --bepinex-path) shift 2 ;;
+    --deploy-path) deployPath="$2"; shift 2 ;;
+    --project-path) projectPath="$2"; shift 2 ;;
+    *) echo "Warning: unknown argument $1" >&2; shift ;;
   esac
 done
 
-# order of precedence: MOD_DEPLOYPATH > BEPINEX_PATH > VALHEIM_INSTALL > default path
-if [ -z "$deployPath" ]; then
-    if [ -z "$bepinexPath" ]; then
-        if [ -z "$valheimPath" ]; then
-            deployPath="$HOME/.local/share/Steam/steamapps/common/Valheim/BepInEx/plugins"
-        else
-            deployPath="$valheimPath/BepInEx/plugins"
-        fi
-    else
-        deployPath="$bepinexPath/plugins"
-    fi
-fi
+name=${targetAssembly%.dll}
 
-# strip .dll extension
-name=$(echo "$targetAssembly" | sed 's/\.dll//')
+copy_runtime_files() {
+    destination=$1
+    includeSymbols=$2
+    mkdir -p "$destination"
+    cp "$targetPath/$targetAssembly" "$destination/"
+    if [ "$includeSymbols" = "true" ]; then
+        [ ! -e "$targetPath/$name.pdb" ] || cp "$targetPath/$name.pdb" "$destination/"
+        [ ! -e "$targetPath/$name.dll.mdb" ] || cp "$targetPath/$name.dll.mdb" "$destination/"
+    fi
+    if [ -d "$projectPath/Assets/Icons" ]; then
+        mkdir -p "$destination/Assets/Icons"
+        cp "$projectPath"/Assets/Icons/*.png "$destination/Assets/Icons/"
+    fi
+}
 
 if [ "$target" = "Debug" ]; then
-    plug="$deployPath/$name"
-    echo "Copying $targetAssembly to $plug"
-
-    mkdir -p "$plug"
-    cp "$targetPath/$targetAssembly" "$plug"
-    # copy if it exists
-    [ -e "$targetPath/$name.pdb" ] && cp "$targetPath/$name.pdb" "$plug"
+    if [ -z "$deployPath" ]; then
+        if [ -n "$valheimPath" ]; then
+            deployPath="$valheimPath/BepInEx/plugins"
+        else
+            deployPath="${XDG_DATA_HOME:-$HOME/.local/share}/Steam/steamapps/common/Valheim/BepInEx/plugins"
+        fi
+    fi
+    pluginPath="$deployPath/$name"
+    if [ -z "$name" ] || [ "$pluginPath" != "$deployPath/$name" ]; then
+        echo "Refusing to clean unexpected deployment path: $pluginPath" >&2
+        exit 1
+    fi
+    rm -rf "$pluginPath"
+    echo "Deploying $targetAssembly and editable assets to $pluginPath"
+    copy_runtime_files "$pluginPath" true
 fi
 
 if [ "$target" = "Release" ]; then
     packagePath="$projectPath/Package"
-    mkdir -p "$packagePath/plugins"
-    cp "$targetPath/$targetAssembly" "$packagePath/plugins/"
-    cp "$projectPath/README.md" "$packagePath/"
+    pluginsPath="$packagePath/plugins"
+    rm -rf "$pluginsPath"
+    copy_runtime_files "$pluginsPath/$name" false
+    cp "$projectPath/README.md" "$packagePath/README.md"
 
-    if command -v zip > /dev/null; then
-        [ -e "$name.zip" ] && rm "$name.zip"
-        cd "$packagePath"
-        zip -r "../$name.zip" . > /dev/null
-        echo "Build successful, your zip is ready for upload at $(realpath ../$name.zip)."
+    if command -v zip >/dev/null 2>&1; then
+        mkdir -p "$targetPath"
+        zipPath=$(cd "$targetPath" && pwd)/$name.zip
+        rm -f "$zipPath"
+        (cd "$packagePath" && zip -r "$zipPath" . >/dev/null)
+        echo "Release package created at $zipPath"
     else
-        echo "Skipping plugin zipping, zip command isn't available."
+        echo "Skipping package creation because the zip command is unavailable." >&2
     fi
 fi
