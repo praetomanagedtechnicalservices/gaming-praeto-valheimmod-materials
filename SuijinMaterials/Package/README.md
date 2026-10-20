@@ -1,6 +1,6 @@
 # SuijinMaterials
 
-SuijinMaterials 0.1 is the shared material registry for future Praeto Valheim mods. It registers 22 lore-friendly inventory materials with stable prefab IDs, English localization, and editable placeholder icons. It does not yet add drops, recipes, merchants, resource nodes, or loot changes.
+SuijinMaterials 0.2 registers 22 lore-friendly materials and adds the approved server-authoritative creature, boss, spawner, and targeted loot acquisition rules. It does not add recipes, merchants, vegetation, or Yggdrasil resource nodes.
 
 ## Installation
 
@@ -27,10 +27,10 @@ Edit the PNG files in `SuijinMaterials/Assets/Icons` in the source repository. K
 
 ## Known limitations
 
-Version 0.1 provides the registry only. The material acquisition systems described in the project roadmap are not implemented yet.
+Gull, Crow, Ash Crow, and Munin Feather acquisition is disabled pending verified source integrations. Existing populated chests are not rewritten.
 
 ## Changelog
 
-### 0.1.0
+### 0.2.0
 
-- Initial registry release with 22 materials and editable blank icons.
+- Added synchronized v0.2 drops and targeted loot rules to the 22-material registry.

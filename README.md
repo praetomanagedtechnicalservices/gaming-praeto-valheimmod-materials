@@ -1,6 +1,6 @@
 # SuijinMaterials
 
-> **v0.1 implementation:** The deployable Valheim 1.0 material registry is now implemented. It registers all 22 custom materials below, with stable prefab IDs, English localization, and transparent placeholder icons. Acquisition systems remain roadmap items.
+> **v0.2 implementation:** The deployable Valheim 1.0 mod registers all 22 custom materials and implements the approved creature, boss, spawner, and targeted loot acquisition rules. World vegetation and merchants remain later milestones.
 
 Build and local setup are documented in [`docs/development.md`](docs/development.md), and verification plus the in-game smoke test are in [`docs/testing.md`](docs/testing.md). The editable blank icon sources are in [`SuijinMaterials/Assets/Icons`](SuijinMaterials/Assets/Icons); preserve their filenames and PNG format when replacing them.
 
@@ -8,7 +8,30 @@ Build and local setup are documented in [`docs/development.md`](docs/development
 
 A standalone BepInEx/Jötunn content mod adding lore-friendly materials, resource nodes, merchant stock, and loot-table adjustments to Valheim. It is the **foundation** for two separate future mods: **Valheim Trinkets** and **Valheim Summons**. This plugin does **not** implement trinket effects, adrenaline mechanics, summons, or new crafting systems.
 
-> **Status:** v0.1 registry implemented for BepInEx 5.4.2351 and Jotunn 2.30.2. The remaining sections describe later milestones and design constraints; they are not claims that those acquisition systems exist in v0.1.
+> **Status:** v0.2 drops and loot implemented for BepInEx 5.4.2351 and Jotunn 2.30.2. Merchant listings, Yarrow, Nightbloom, and Yggdrasil Branch world placement are not implemented in v0.2.
+
+## Implemented v0.2 defaults
+
+All settings are server-authoritative and synchronized. Chances are configurable in `dev.praeto.valheim.materials.cfg`.
+
+| Material | Source | Default |
+|---|---|---:|
+| Huginn's Feather | eligible naturally generated overworld chests | 12%, one maximum |
+| Hen Feather | converts one actual Hen `Feathers` item per drop event; remaining Feathers stay vanilla | 100%, 1 |
+| Elderroot | Greydwarf nest | 25%, 1 |
+| Elderroot | The Elder | 100%, 1–4 |
+| Rotten Elderroot | Abomination | 25%, 1 |
+| Runecarved Bone | Skeleton spawning piles | 100%, 1 |
+| Silver Crystal | replaces Stone Golem Crystal | 1:1 |
+| Frostbitten Fang | Fenring | 20%, 1 |
+| Frostbitten Fang | 1-star / 2-star Wolf | 15% / 30%, 1 |
+| Fuling Flesh | Fuling, Berserker, and Shaman | 20%, 1 |
+| Fuling Hex Totem | Fuling Shaman | 10%, 1 |
+| Gold Scrap | replaces Copper Scrap in allowlisted Mistlands ruins | 1:1 |
+| Dvergr Flesh | Dvergr and Dvergr Mage | 15%, 1 |
+| Seeker Venom Gland | Seeker / Seeker Soldier | 15% / 25%, 1 |
+
+Gull Feather, Crow Feather, Ash Crow Feather, and Munin Feather acquisition are deliberately disabled until verified source integrations are added. Their items remain registered. Existing populated chests are never rewritten; the chest rule applies only during initial eligible loot generation.
 
 ## Goals
 

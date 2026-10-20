@@ -26,17 +26,17 @@ namespace SuijinMaterials.Acquisition
             foreach (AcquisitionDefinition rule in rules)
             {
                 RuleSettings configured = settings.Get(rule.RuleId);
-                if (!configured.Enabled || rule.Kind == AcquisitionRuleKind.Disabled || !Matches(rule, context)) continue;
+                if (!configured.Enabled || configured.Chance <= 0 || rule.Kind == AcquisitionRuleKind.Disabled || !Matches(rule, context)) continue;
 
                 if (rule.RuleId == "hen-feather-conversion")
                 {
-                    ReplaceAll(output, rule.ReplacedPrefabId, rule.MaterialPrefabId);
+                    if (Passes(configured.Chance)) ReplaceOneFromTotal(output, rule.ReplacedPrefabId, rule.MaterialPrefabId);
                     continue;
                 }
 
                 if (rule.Kind == AcquisitionRuleKind.ReplaceCreatureDrop || rule.Kind == AcquisitionRuleKind.ReplaceContainerLoot)
                 {
-                    ReplaceOneForOne(output, rule.ReplacedPrefabId, rule.MaterialPrefabId);
+                    if (Passes(configured.Chance)) ReplaceOneForOne(output, rule.ReplacedPrefabId, rule.MaterialPrefabId);
                     continue;
                 }
 
@@ -89,12 +89,13 @@ namespace SuijinMaterials.Acquisition
             return result.EndsWith(clone, StringComparison.OrdinalIgnoreCase) ? result.Substring(0, result.Length - clone.Length).TrimEnd() : result;
         }
 
-        private static void ReplaceAll(List<DropStack> drops, string replaced, string replacement)
+        private static void ReplaceOneFromTotal(List<DropStack> drops, string replaced, string replacement)
         {
             int total = drops.Where(drop => SamePrefab(replaced, drop.PrefabId)).Sum(drop => drop.Amount);
             if (total == 0) return;
             drops.RemoveAll(drop => SamePrefab(replaced, drop.PrefabId));
-            drops.Add(new DropStack(replacement, total));
+            if (total > 1) drops.Add(new DropStack(replaced, total - 1));
+            drops.Add(new DropStack(replacement, 1));
         }
 
         private static void ReplaceOneForOne(List<DropStack> drops, string replaced, string replacement)

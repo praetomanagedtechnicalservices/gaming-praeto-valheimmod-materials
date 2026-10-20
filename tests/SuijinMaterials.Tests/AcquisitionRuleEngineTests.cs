@@ -25,9 +25,20 @@ namespace SuijinMaterials.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result.Count(drop => drop.PrefabId == "praeto_mat_hen_feather"), Is.EqualTo(1));
-                Assert.That(result.Single(drop => drop.PrefabId == "praeto_mat_hen_feather").Amount, Is.EqualTo(5));
+                Assert.That(result.Single(drop => drop.PrefabId == "praeto_mat_hen_feather").Amount, Is.EqualTo(1));
+                Assert.That(result.Single(drop => drop.PrefabId == "Feathers").Amount, Is.EqualTo(4));
                 Assert.That(input.Count(drop => drop.PrefabId == "Feathers"), Is.EqualTo(2));
             });
+        }
+
+        [Test]
+        public void Zero_chance_disables_replacement_rules()
+        {
+            var values = AcquisitionCatalog.All.ToDictionary(rule => rule.RuleId, rule => new RuleSettings(rule.Kind != AcquisitionRuleKind.Disabled, rule.DefaultChance, rule.DefaultMinAmount, rule.DefaultMaxAmount));
+            values["silver-crystal-stone-golem"] = new RuleSettings(true, 0, 1, 1);
+            var engine = new AcquisitionRuleEngine(AcquisitionCatalog.All, new AcquisitionSettingsSnapshot(values), new FakeRandom(0));
+            IReadOnlyList<DropStack> result = engine.Apply(new AcquisitionContext(AcquisitionEventKind.CreatureDrops, "StoneGolem"), new[] { new DropStack("Crystal", 2) });
+            Assert.That(result.Single().PrefabId, Is.EqualTo("Crystal"));
         }
 
         [Test]

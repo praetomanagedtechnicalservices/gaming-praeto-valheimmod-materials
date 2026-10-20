@@ -39,7 +39,7 @@ Assert-True (-not (Test-Path -LiteralPath (Join-Path $deployedRoot 'Assets\Icons
 $manifestPath = Join-Path $repo 'SuijinMaterials\Package\manifest.json'
 $manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
 Assert-True ($manifest.name -eq 'SuijinMaterials') 'Manifest name must be SuijinMaterials.'
-Assert-True ($manifest.version_number -eq '0.1.0') 'Manifest version must be 0.1.0.'
+Assert-True ($manifest.version_number -eq '0.2.0') 'Manifest version must be 0.2.0.'
 Assert-True ($manifest.dependencies -contains 'denikson-BepInExPack_Valheim-5.4.2351') 'Manifest must pin BepInEx 5.4.2351.'
 Assert-True ($manifest.dependencies -contains 'ValheimModding-Jotunn-2.30.2') 'Manifest must pin Jotunn 2.30.2.'
 
