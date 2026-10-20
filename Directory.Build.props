@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)Environment.props"
+          Condition="'$(SolutionDir)' == '' And Exists('$(MSBuildThisFileDirectory)Environment.props')" />
+  <Import Project="$(MSBuildThisFileDirectory)DoPrebuild.props"
+          Condition="Exists('$(MSBuildThisFileDirectory)DoPrebuild.props') And '$(ExecutePrebuild)' == ''" />
+  <PropertyGroup>
+    <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
+  </PropertyGroup>
+</Project>
