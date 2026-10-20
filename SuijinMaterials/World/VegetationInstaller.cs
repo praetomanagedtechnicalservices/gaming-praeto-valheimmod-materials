@@ -25,7 +25,14 @@ namespace SuijinMaterials.World
             WorldRuleSettings yarrow = settings.Get("yarrow-meadows");
             if (yarrow.Enabled && yarrow.Chance > 0)
             {
-                facade.AddYarrow(yarrow);
+                try
+                {
+                    facade.AddYarrow(yarrow);
+                }
+                catch (Exception exception)
+                {
+                    logWarning("Yarrow vegetation was not installed. " + exception.Message);
+                }
             }
 
             WorldRuleSettings nightbloom = settings.Get("nightbloom-swamp");
@@ -45,7 +52,6 @@ namespace SuijinMaterials.World
                 facade.SetThistleBiomeMask(vanillaMask);
                 originalThistleBiomeMask = null;
                 logWarning("Nightbloom vegetation was not installed; the vanilla Thistle biome mask was restored. " + exception.Message);
-                throw;
             }
         }
 
