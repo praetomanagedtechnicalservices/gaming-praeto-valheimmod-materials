@@ -29,3 +29,4 @@ SuijinMaterialsUnity/Assets/Assemblies/*.mdb
 
 # Superpowers execution scratch
 .superpowers/sdd/
+.worktrees/
