@@ -1,0 +1,2 @@
+using System; using System.Collections.Generic;
+namespace SuijinMaterials.Merchants { public static class MerchantStockCatalog { public static IReadOnlyList<MerchantStockDefinition> All {get;}=Array.AsReadOnly(new[]{new MerchantStockDefinition("haldor-aged-tissue","Haldor","praeto_mat_aged_tissue",240,1,"defeated_dragon"),new MerchantStockDefinition("hildir-canvas","Hildir","praeto_mat_canvas",60,1,""),new MerchantStockDefinition("bogwitch-voodoo-doll","BogWitch","praeto_mat_voodoo_doll",500,1,"defeated_goblinking")}); } }

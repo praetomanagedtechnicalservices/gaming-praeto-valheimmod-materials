@@ -1,0 +1,2 @@
+using System; using System.Collections.Generic;
+namespace SuijinMaterials.World { public sealed class WorldSettingsSnapshot { private readonly IReadOnlyDictionary<string,WorldRuleSettings> values; public WorldSettingsSnapshot(IDictionary<string,WorldRuleSettings> values){this.values=new Dictionary<string,WorldRuleSettings>(values??throw new ArgumentNullException(nameof(values)),StringComparer.Ordinal);} public WorldRuleSettings Get(string id)=>values[id]; } }
