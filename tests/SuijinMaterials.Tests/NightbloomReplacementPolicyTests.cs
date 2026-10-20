@@ -1,0 +1,2 @@
+using NUnit.Framework; using SuijinMaterials.World;
+namespace SuijinMaterials.Tests { [TestFixture] public sealed class NightbloomReplacementPolicyTests { [Test] public void Removes_only_swamp_and_assigns_swamp_to_replacement(){var x=NightbloomReplacementPolicy.SplitBiomeMask(1|2|8);Assert.Multiple(()=>{Assert.That(x.VanillaBiomeMask,Is.EqualTo(1|8));Assert.That(x.ReplacementBiomeMask,Is.EqualTo(2));});} } }
