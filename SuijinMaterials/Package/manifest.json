@@ -1,0 +1,10 @@
+{
+  "name": "SuijinMaterials",
+  "description": "Lore-friendly material registry and shared content foundation for Valheim.",
+  "version_number": "0.1.0",
+  "website_url": "https://github.com/praeto/gaming-praeto-valheimmod-materials",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2351",
+    "ValheimModding-Jotunn-2.30.2"
+  ]
+}

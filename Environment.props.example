@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <!-- Copy this file to Environment.props and set paths for your machine. -->
+    <VALHEIM_INSTALL>C:\Path\To\SteamLibrary\steamapps\common\Valheim</VALHEIM_INSTALL>
+    <BEPINEX_PATH>C:\Path\To\Thunderstore\Valheim\profiles\ProfileName\BepInEx</BEPINEX_PATH>
+    <MOD_DEPLOYPATH>$(BEPINEX_PATH)\plugins</MOD_DEPLOYPATH>
+  </PropertyGroup>
+</Project>

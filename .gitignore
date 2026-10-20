@@ -1,0 +1,31 @@
+# Local developer configuration
+Environment.props
+
+# IDE and build output
+.vs/
+.idea/
+*.user
+*.suo
+**/bin/
+**/obj/
+/Packages/
+*.zip
+
+# Generated Thunderstore staging content
+SuijinMaterials/Package/plugins/
+SuijinMaterials/Package/Assets/
+
+# Unity generated data
+SuijinMaterialsUnity/Library/
+SuijinMaterialsUnity/Temp/
+SuijinMaterialsUnity/Logs/
+SuijinMaterialsUnity/Obj/
+SuijinMaterialsUnity/UserSettings/
+
+# Proprietary/local game assemblies (retain their .meta files)
+SuijinMaterialsUnity/Assets/Assemblies/*.dll
+SuijinMaterialsUnity/Assets/Assemblies/*.pdb
+SuijinMaterialsUnity/Assets/Assemblies/*.mdb
+
+# Superpowers execution scratch
+.superpowers/sdd/
