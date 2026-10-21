@@ -6,6 +6,7 @@ using SuijinMaterials.Acquisition;
 using SuijinMaterials.Config;
 using SuijinMaterials.Content;
 using SuijinMaterials.Merchants;
+using SuijinMaterials.Runtime;
 using SuijinMaterials.World;
 
 namespace SuijinMaterials
@@ -26,7 +27,7 @@ namespace SuijinMaterials
         private AcquisitionCoordinator acquisitionCoordinator;
         private MerchantStockCoordinator merchantStockCoordinator;
         private WorldMaterialCoordinator worldMaterialCoordinator;
-        private bool worldInstalled;
+        private PluginLifecycleController lifecycle;
 
         private void Awake()
         {
@@ -40,72 +41,97 @@ namespace SuijinMaterials
                 message => Logger.LogInfo(message),
                 message => Logger.LogError(message));
 
+            lifecycle = new PluginLifecycleController(
+                RegisterMaterials,
+                new PluginSubsystem("acquisition", InstallAcquisition, RefreshAcquisition, UninstallAcquisition),
+                new PluginSubsystem("merchants", InstallMerchants, RefreshMerchants, UninstallMerchants),
+                new PluginSubsystem("world", InstallWorldMaterials, RefreshWorldMaterials, UninstallWorldMaterials),
+                message => Logger.LogError(message));
+
             MaterialLocalization.RegisterEnglish();
-            PrefabManager.OnVanillaPrefabsAvailable += RegisterMaterials;
+            PrefabManager.OnVanillaPrefabsAvailable += OnVanillaPrefabsAvailable;
+            ZoneManager.OnVanillaVegetationAvailable += OnVanillaVegetationAvailable;
             SynchronizationManager.OnConfigurationSynchronized += OnConfigurationSynchronized;
             Logger.LogInfo($"{PluginName} {PluginVersion} initialized");
         }
 
-        private void RegisterMaterials()
-        {
-            PrefabManager.OnVanillaPrefabsAvailable -= RegisterMaterials;
+        private void OnVanillaPrefabsAvailable() => lifecycle?.OnVanillaPrefabsAvailable();
+        private void OnVanillaVegetationAvailable() => lifecycle?.OnVanillaVegetationAvailable();
+        private void OnConfigurationSynchronized(object sender, ConfigurationSynchronizationEventArgs args) => lifecycle?.OnConfigurationSynchronized();
 
+        private bool RegisterMaterials()
+        {
             RegistrationSummary summary = materialRegistry.RegisterAll(MaterialCatalog.All);
             Logger.LogInfo($"Material registration complete: {summary.RegisteredCount} registered, {summary.FailedCount} failed.");
+            if (summary.FailedCount == 0) return true;
+            Logger.LogError("Dependent runtime systems were not installed because one or more material prefabs failed registration.");
+            return false;
+        }
 
-            if (summary.FailedCount != 0)
-            {
-                Logger.LogError("Acquisition and v0.3 world systems were not installed because one or more material prefabs failed registration.");
-                return;
-            }
-
+        private void InstallAcquisition()
+        {
             acquisitionCoordinator = new AcquisitionCoordinator(materialsConfig, PluginGuid, message => Logger.LogError(message));
-            AcquisitionInstallationSummary acquisition = acquisitionCoordinator.Install();
-            Logger.LogInfo($"Acquisition installation complete: {acquisition.InstalledCount} installed, {acquisition.DisabledCount} disabled, {acquisition.FailedCount} failed.");
+            AcquisitionInstallationSummary summary = acquisitionCoordinator.Install();
+            Logger.LogInfo($"Acquisition installation complete: {summary.InstalledCount} installed, {summary.DisabledCount} disabled, {summary.FailedCount} failed.");
+        }
 
+        private void RefreshAcquisition()
+        {
+            AcquisitionInstallationSummary summary = acquisitionCoordinator.Refresh();
+            Logger.LogInfo($"Acquisition configuration refreshed: {summary.InstalledCount} active, {summary.DisabledCount} disabled.");
+        }
+
+        private void UninstallAcquisition()
+        {
+            acquisitionCoordinator?.Uninstall();
+            acquisitionCoordinator = null;
+        }
+
+        private void InstallMerchants()
+        {
             merchantStockCoordinator = new MerchantStockCoordinator(merchantStockConfig, message => Logger.LogError(message));
-            MerchantInstallationSummary merchants = merchantStockCoordinator.Install();
-            Logger.LogInfo($"Merchant stock installation complete: {merchants.InstalledCount} installed, {merchants.DisabledCount} disabled, {merchants.FailedCount} failed.");
+            MerchantInstallationSummary summary = merchantStockCoordinator.Install();
+            Logger.LogInfo($"Merchant stock installation complete: {summary.InstalledCount} installed, {summary.DisabledCount} disabled, {summary.FailedCount} failed.");
+        }
 
-            worldMaterialCoordinator = new WorldMaterialCoordinator(worldMaterialsConfig, message => Logger.LogError(message));
-            ZoneManager.OnVanillaVegetationAvailable += InstallWorldMaterials;
+        private void RefreshMerchants()
+        {
+            MerchantInstallationSummary summary = merchantStockCoordinator.Refresh();
+            Logger.LogInfo($"Merchant stock configuration refreshed: {summary.InstalledCount} active, {summary.DisabledCount} disabled.");
+        }
+
+        private void UninstallMerchants()
+        {
+            merchantStockCoordinator?.Uninstall();
+            merchantStockCoordinator = null;
         }
 
         private void InstallWorldMaterials()
         {
-            ZoneManager.OnVanillaVegetationAvailable -= InstallWorldMaterials;
-            WorldInstallationSummary world = worldMaterialCoordinator.Install();
-            worldInstalled = true;
-            Logger.LogInfo($"World material installation complete: {world.InstalledRuleCount} active rules, {world.FailedSystemCount} failed systems.");
+            worldMaterialCoordinator = new WorldMaterialCoordinator(worldMaterialsConfig, message => Logger.LogError(message));
+            WorldInstallationSummary summary = worldMaterialCoordinator.Install();
+            Logger.LogInfo($"World material installation complete: {summary.InstalledRuleCount} active rules, {summary.FailedSystemCount} failed systems.");
         }
 
-        private void OnConfigurationSynchronized(object sender, ConfigurationSynchronizationEventArgs args)
+        private void RefreshWorldMaterials()
         {
-            if (acquisitionCoordinator != null)
-            {
-                AcquisitionInstallationSummary acquisition = acquisitionCoordinator.Refresh();
-                Logger.LogInfo($"Acquisition configuration refreshed: {acquisition.InstalledCount} active, {acquisition.DisabledCount} disabled.");
-            }
-            if (merchantStockCoordinator != null)
-            {
-                MerchantInstallationSummary merchants = merchantStockCoordinator.Refresh();
-                Logger.LogInfo($"Merchant stock configuration refreshed: {merchants.InstalledCount} active, {merchants.DisabledCount} disabled.");
-            }
-            if (worldInstalled && worldMaterialCoordinator != null)
-            {
-                WorldInstallationSummary world = worldMaterialCoordinator.Refresh();
-                Logger.LogInfo($"World material configuration refreshed: {world.InstalledRuleCount} active rules, {world.FailedSystemCount} failed systems.");
-            }
+            WorldInstallationSummary summary = worldMaterialCoordinator.Refresh();
+            Logger.LogInfo($"World material configuration refreshed: {summary.InstalledRuleCount} active rules, {summary.FailedSystemCount} failed systems.");
+        }
+
+        private void UninstallWorldMaterials()
+        {
+            worldMaterialCoordinator?.Uninstall();
+            worldMaterialCoordinator = null;
         }
 
         private void OnDestroy()
         {
-            PrefabManager.OnVanillaPrefabsAvailable -= RegisterMaterials;
-            ZoneManager.OnVanillaVegetationAvailable -= InstallWorldMaterials;
+            PrefabManager.OnVanillaPrefabsAvailable -= OnVanillaPrefabsAvailable;
+            ZoneManager.OnVanillaVegetationAvailable -= OnVanillaVegetationAvailable;
             SynchronizationManager.OnConfigurationSynchronized -= OnConfigurationSynchronized;
-            worldMaterialCoordinator?.Uninstall();
-            merchantStockCoordinator?.Uninstall();
-            acquisitionCoordinator?.Uninstall();
+            lifecycle?.Teardown();
+            lifecycle = null;
         }
     }
 }
