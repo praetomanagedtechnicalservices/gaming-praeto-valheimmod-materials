@@ -40,7 +40,7 @@ namespace SuijinMaterials.World
             if (ReferenceEquals(Active, this)) Active = null;
             foreach (YggdrasilBranchRootWatcher watcher in UnityEngine.Object.FindObjectsByType<YggdrasilBranchRootWatcher>(FindObjectsSortMode.None))
             {
-                watcher.RemoveNode();
+                watcher.Teardown();
                 UnityEngine.Object.Destroy(watcher);
             }
             settings = null;
@@ -87,9 +87,13 @@ namespace SuijinMaterials.World
                 return true;
             }
 
-            watcher.EnsureNode(state.Height01, state.AngleDegrees, settings.Yield, settings.MinimumToolTier);
+            watcher.EnsureNode(state.Height01, state.AngleDegrees);
             return true;
         }
+
+        internal WorldRuleSettings GetSettings() => settings;
+
+        internal void LogError(string message) => logError(message);
 
         private void BackfillLoadedRoots()
         {
@@ -125,12 +129,23 @@ namespace SuijinMaterials.World
         private ZNetView root;
         private YggdrasilBranchInstaller installer;
         private YggdrasilBranchNode node;
+        private YggdrasilBranchRpc rpc;
         private float nextCheck;
 
         internal void Configure(ZNetView rootView, YggdrasilBranchInstaller owner)
         {
             root = rootView;
             installer = owner;
+            if (rpc == null)
+            {
+                rpc = new YggdrasilBranchRpc(
+                    new ZNetViewBranchHarvestRpcPeer(root, owner.LogError),
+                    () => new ZdoYggdrasilRootState(root.GetZDO()),
+                    owner.GetSettings,
+                    EmitLoot,
+                    owner.LogError);
+                rpc.Register();
+            }
             nextCheck = 0f;
         }
 
@@ -141,7 +156,7 @@ namespace SuijinMaterials.World
             installer?.EnsureNode(root, this);
         }
 
-        internal void EnsureNode(float height01, float angleDegrees, int yield, int minimumToolTier)
+        internal void EnsureNode(float height01, float angleDegrees)
         {
             if (node != null) return;
             GameObject holder = new GameObject("praeto_yggdrasil_branch_node");
@@ -153,7 +168,13 @@ namespace SuijinMaterials.World
             BoxCollider collider = holder.AddComponent<BoxCollider>();
             collider.size = new Vector3(0.45f, 0.45f, 1.8f);
             node = holder.AddComponent<YggdrasilBranchNode>();
-            node.Configure(root, yield, minimumToolTier);
+            node.Configure(rpc);
+        }
+
+        private void OnDestroy()
+        {
+            rpc?.Unregister();
+            rpc = null;
         }
 
         internal void RemoveNode()
@@ -161,6 +182,22 @@ namespace SuijinMaterials.World
             if (node == null) return;
             UnityEngine.Object.Destroy(node.gameObject);
             node = null;
+        }
+
+        internal void Teardown()
+        {
+            RemoveNode();
+            rpc?.Unregister();
+            rpc = null;
+        }
+
+        private static void EmitLoot(BranchHarvestRequest request, int yield)
+        {
+            GameObject prefab = PrefabManager.Instance.GetPrefab("praeto_mat_yggdrasil_branch");
+            ItemDrop drop = prefab == null ? null : prefab.GetComponent<ItemDrop>();
+            if (drop == null) throw new InvalidOperationException("Yggdrasil Branch item prefab was not registered.");
+            Vector3 position = new Vector3(request.HitX, request.HitY, request.HitZ);
+            ItemDrop.DropItem(drop.m_itemData.Clone(), yield, position, Quaternion.identity);
         }
 
         private static void CopyBranchVisual(Transform target)

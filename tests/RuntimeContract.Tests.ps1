@@ -27,6 +27,9 @@ Require-Method ZNetView IsOwner
 Require-Method ZNetView Awake
 Require-Method ZNetView GetPrefabName
 Require-Method ZNetView GetZDO
+Require-Method ZNetView Register
+Require-Method ZNetView InvokeRPC
+Require-Method ZNetView Unregister
 Require-Method Location GetLocation
 Require-Method WorldGenerator GetSeed
 Require-Method HitData GetTotalPhysicalDamage
@@ -34,6 +37,10 @@ Require-Method ItemDrop DropItem
 Require-Method ZDO GetBool
 Require-Method ZDO GetFloat
 Require-Method ZDO Set
+Require-Method ZPackage Write
+Require-Method ZPackage ReadInt
+Require-Method ZPackage ReadSingle
+Require-Method ZPackage SetPos
 Require-Field DropOnDestroyed m_dropWhenDestroyed
 Require-Field Container m_inventory
 Require-Field Trader m_items
