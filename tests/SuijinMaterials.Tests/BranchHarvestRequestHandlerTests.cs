@@ -101,6 +101,30 @@ namespace SuijinMaterials.Tests
             });
         }
 
+        [TestCaseSource(nameof(NonFiniteDamageValues))]
+        public void Non_finite_damage_is_rejected_without_state_or_loot(float damage)
+        {
+            FakeState state = EligibleState();
+            int emissions = 0;
+
+            BranchHarvestResult result = BranchHarvestRequestHandler.Handle(
+                true, state, Request(7, damage, 0), 0, () => emissions++);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result, Is.EqualTo(BranchHarvestResult.RejectedNoDamage));
+                Assert.That(state.Depleted, Is.False);
+                Assert.That(emissions, Is.Zero);
+            });
+        }
+
+        private static readonly float[] NonFiniteDamageValues =
+        {
+            float.NaN,
+            float.PositiveInfinity,
+            float.NegativeInfinity
+        };
+
         private static BranchHarvestRequest Request(int skill, float damage, int tier) =>
             new BranchHarvestRequest(skill, damage, tier, 1f, 2f, 3f);
 

@@ -101,6 +101,31 @@ namespace SuijinMaterials.Tests
             });
         }
 
+        [Test]
+        public void Non_finite_hit_position_is_contained_without_state_or_loot()
+        {
+            FakePeer peer = new FakePeer { Owner = true };
+            FakeState state = EligibleState();
+            int emissions = 0;
+            int errors = 0;
+            YggdrasilBranchRpc rpc = new YggdrasilBranchRpc(
+                peer,
+                () => state,
+                () => new WorldRuleSettings(true, .35, 1, 1, 1, 0, 0, false),
+                (_, __) => emissions++,
+                _ => errors++);
+            rpc.Register();
+
+            peer.Deliver(new BranchHarvestRequest(7, 10f, 0, float.NaN, 2f, 3f));
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(state.Depleted, Is.False);
+                Assert.That(emissions, Is.Zero);
+                Assert.That(errors, Is.EqualTo(1));
+            });
+        }
+
         private static YggdrasilBranchRpc Create(FakePeer peer, FakeState state, int yield, Action<BranchHarvestRequest, int> emit) =>
             new YggdrasilBranchRpc(
                 peer,

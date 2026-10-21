@@ -17,6 +17,8 @@ namespace SuijinMaterials.World
             if (state == null) throw new ArgumentNullException(nameof(state));
             if (request == null) throw new ArgumentNullException(nameof(request));
             if (!state.Initialized || !state.Eligible) return BranchHarvestResult.RejectedIneligible;
+            if (float.IsNaN(request.PhysicalDamage) || float.IsInfinity(request.PhysicalDamage))
+                return BranchHarvestResult.RejectedNoDamage;
 
             bool isChop = request.Skill == AxesSkill || request.Skill == WoodCuttingSkill;
             BranchHarvestContext context = new BranchHarvestContext(

@@ -51,6 +51,11 @@ namespace SuijinMaterials.World
         {
             try
             {
+                if (!HasFiniteHitPosition(request))
+                {
+                    logError("Rejected Yggdrasil Branch RPC with an invalid hit position from sender " + sender + ".");
+                    return;
+                }
                 WorldRuleSettings current = settings();
                 if (current == null || !current.Enabled) return;
                 BranchHarvestRequestHandler.Handle(
@@ -65,6 +70,14 @@ namespace SuijinMaterials.World
                 logError("Yggdrasil Branch RPC failed for sender " + sender + ": " + exception.Message);
             }
         }
+
+        private static bool HasFiniteHitPosition(BranchHarvestRequest request)
+        {
+            if (request == null) return false;
+            return IsFinite(request.HitX) && IsFinite(request.HitY) && IsFinite(request.HitZ);
+        }
+
+        private static bool IsFinite(float value) => !float.IsNaN(value) && !float.IsInfinity(value);
     }
 
     internal sealed class ZNetViewBranchHarvestRpcPeer : IBranchHarvestRpcPeer

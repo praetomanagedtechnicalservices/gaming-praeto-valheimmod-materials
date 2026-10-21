@@ -238,7 +238,7 @@ valheim-materials/
 - **v0.1.0 – Registry:** Plugin loads, all custom items register, IDs and icons work, inventory items persist after reload.
 - **v0.2.0 – Drops:** Feather conversion, creature drops, boss/spawner drops, and targeted loot-table changes.
 - **v0.3.0 – World and merchants:** Yarrow, Nightbloom, one-time Yggdrasil Branch placement/harvesting, and Haldor/Hildir/Bog Witch stock.
-- **v0.4.0 – Future integrations:** Remaining disabled feather sources and later approved content.
+- **v0.4.0 – Skipped:** Unapproved feather integrations were deferred instead of being inferred from substitute sources.
 - **v0.5.0 – Multiplayer QA:** Existing-world handling, server authority, config synchronization, regression tests, release packaging.
 
 ## Acceptance tests
@@ -247,7 +247,7 @@ valheim-materials/
 - [ ] Ordinary feather total plus species feather total equals original ordinary feather count for eligible drops.
 - [ ] Huginn's Feather appears only in eligible world chests, not dungeon or player-built chests.
 - [ ] Haldor's Aged Tissue costs 240 coins and unlocks after Moder.
-- [ ] Witch's Voodoo Doll costs 500 coins and unlocks after Yagluth when Witch integration is available.
+- [ ] The Bog Witch's Voodoo Doll costs 500 coins and unlocks after Yagluth.
 - [ ] Hildir's Canvas costs 60 coins.
 - [ ] Yarrow appears in Meadows and can be harvested.
 - [ ] Elderroot drops from Greydwarf spawners and The Elder.

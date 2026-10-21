@@ -22,6 +22,7 @@ $lifecycle = Join-Path $repo 'SuijinMaterials\Runtime\PluginLifecycleController.
 $rpc = Join-Path $repo 'SuijinMaterials\World\YggdrasilBranchRpc.cs'
 $branchInstaller = Join-Path $repo 'SuijinMaterials\World\YggdrasilBranchInstaller.cs'
 $acquisitionCatalog = Join-Path $repo 'SuijinMaterials\Acquisition\AcquisitionCatalog.cs'
+$readme = Join-Path $repo 'README.md'
 
 Assert-True (Test-Path -LiteralPath $solution) 'SuijinMaterials.sln must exist.'
 Assert-True (Test-Path -LiteralPath $project) 'SuijinMaterials.csproj must exist.'
@@ -76,6 +77,12 @@ if (Test-Path -LiteralPath $acquisitionCatalog) {
     foreach ($id in $disabledFeatherIds) {
         Assert-True ($catalogSource -match [regex]::Escape($id)) "Disabled feather rule is missing: $id."
     }
+}
+
+if (Test-Path -LiteralPath $readme) {
+    $readmeSource = Get-Content -Raw -LiteralPath $readme
+    Assert-True ($readmeSource -match 'v0\.4\.0.+[Ss]kipped') 'Current README must record v0.4.0 as intentionally skipped.'
+    Assert-True ($readmeSource -notmatch 'v0\.4\.0\s*[–-]\s*Future integrations') 'Current README must not present v0.4.0 as a future integration release.'
 }
 
 if (Test-Path -LiteralPath $backend) {
