@@ -4,6 +4,7 @@ namespace SuijinMaterials.World
     {
         Harvested,
         RejectedNotAuthoritative,
+        RejectedIneligible,
         RejectedDepleted,
         RejectedNotChop,
         RejectedNoDamage,
