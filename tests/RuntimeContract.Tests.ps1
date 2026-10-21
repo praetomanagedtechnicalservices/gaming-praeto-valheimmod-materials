@@ -58,4 +58,4 @@ foreach ($method in 'AddCustomVegetation','GetZoneVegetation','RemoveCustomVeget
     if (-not ($zoneManager.Methods | Where-Object Name -eq $method)) { throw "Required Jotunn method missing: ZoneManager.$method" }
 }
 
-Write-Host 'Runtime contract passed for Valheim 1.0 v0.2/v0.3 adapters.'
+Write-Host 'Runtime contract passed for Valheim 1.0 v0.5 adapters.'

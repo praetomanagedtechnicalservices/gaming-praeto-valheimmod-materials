@@ -18,7 +18,7 @@ namespace SuijinMaterials
     {
         public const string PluginGuid = "dev.praeto.valheim.materials";
         public const string PluginName = "SuijinMaterials";
-        public const string PluginVersion = "0.3.0";
+        public const string PluginVersion = "0.5.0";
 
         private MaterialRegistry materialRegistry;
         private MaterialsConfig materialsConfig;

@@ -1,6 +1,6 @@
 # SuijinMaterials
 
-> **v0.3 implementation:** The deployable Valheim 1.0 mod registers all 22 custom materials, retains the approved v0.2 loot rules, and adds Meadows Yarrow, Swamp Nightbloom, persistent Yggdrasil Branch nodes, and stock for Haldor, Hildir, and the vanilla Bog Witch.
+> **v0.5 implementation:** The deployable Valheim 1.0 mod registers all 22 custom materials, retains the approved loot/world/merchant rules, and hardens startup plus owner-authoritative multiplayer Yggdrasil Branch harvesting. Version 0.4 was intentionally skipped.
 
 Build and local setup are documented in [`docs/development.md`](docs/development.md), and verification plus the in-game smoke test are in [`docs/testing.md`](docs/testing.md). The editable blank icon sources are in [`SuijinMaterials/Assets/Icons`](SuijinMaterials/Assets/Icons); preserve their filenames and PNG format when replacing them.
 
@@ -8,9 +8,11 @@ Build and local setup are documented in [`docs/development.md`](docs/development
 
 A standalone BepInEx/Jötunn content mod adding lore-friendly materials, resource nodes, merchant stock, and loot-table adjustments to Valheim. It is the **foundation** for two separate future mods: **Valheim Trinkets** and **Valheim Summons**. This plugin does **not** implement trinket effects, adrenaline mechanics, summons, or new crafting systems.
 
-> **Status:** v0.3 world materials and merchant stock implemented for BepInEx 5.4.2351 and Jotunn 2.30.2. Live in-game smoke testing is still required before public release.
+> **Status:** v0.5 hardening is implemented for BepInEx 5.4.2351 and Jotunn 2.30.2. Live dedicated-server/two-client smoke testing is still required before public release; it has not been claimed as passed.
 
-## Implemented v0.3 defaults
+Version 0.5 keeps the v0.3 `praeto.suijin.v03.branch.` save-state prefix for existing-world compatibility. Branch harvest requests use owner-side validation and the exact RPC `praeto.suijin.v05.branch.harvest`. Gull, Crow, Ash Crow, and Munin Feather acquisition remains disabled.
+
+## World and merchant defaults (retained in v0.5)
 
 All settings are synchronized from the server in `dev.praeto.valheim.materials.cfg`.
 

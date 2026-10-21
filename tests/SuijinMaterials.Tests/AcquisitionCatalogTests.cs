@@ -64,6 +64,10 @@ namespace SuijinMaterials.Tests
         {
             string[] ids = { "gull-feather-disabled", "crow-feather-disabled", "ash-crow-feather-disabled", "munin-feather-disabled" };
 
+            Assert.That(
+                AcquisitionCatalog.All.Where(rule => rule.Kind == AcquisitionRuleKind.Disabled).Select(rule => rule.RuleId),
+                Is.EquivalentTo(ids));
+
             foreach (string id in ids)
             {
                 AcquisitionDefinition rule = Rule(id);

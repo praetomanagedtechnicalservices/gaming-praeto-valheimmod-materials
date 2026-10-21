@@ -39,7 +39,7 @@ Assert-True (-not (Test-Path -LiteralPath (Join-Path $deployedRoot 'Assets\Icons
 $manifestPath = Join-Path $repo 'SuijinMaterials\Package\manifest.json'
 $manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
 Assert-True ($manifest.name -eq 'SuijinMaterials') 'Manifest name must be SuijinMaterials.'
-Assert-True ($manifest.version_number -eq '0.3.0') 'Manifest version must be 0.3.0.'
+Assert-True ($manifest.version_number -eq '0.5.0') 'Manifest version must be 0.5.0.'
 Assert-True ($manifest.dependencies -contains 'denikson-BepInExPack_Valheim-5.4.2351') 'Manifest must pin BepInEx 5.4.2351.'
 Assert-True ($manifest.dependencies -contains 'ValheimModding-Jotunn-2.30.2') 'Manifest must pin Jotunn 2.30.2.'
 
@@ -53,12 +53,21 @@ if (Test-Path -LiteralPath $zipPath) {
         Assert-True ($entries -contains 'README.md') 'Release package is missing README.md.'
         Assert-True ($entries -contains 'icon.png') 'Release package is missing icon.png.'
         Assert-True ($entries -contains 'plugins/SuijinMaterials/SuijinMaterials.dll') 'Release package is missing the plugin DLL at its runtime path.'
+        $packagedManifestEntry = $archive.GetEntry('manifest.json')
+        if ($packagedManifestEntry) {
+            $reader = [System.IO.StreamReader]::new($packagedManifestEntry.Open())
+            try { $packagedManifest = $reader.ReadToEnd() | ConvertFrom-Json }
+            finally { $reader.Dispose() }
+            Assert-True ($packagedManifest.version_number -eq '0.5.0') 'Release package contains a stale manifest version.'
+        }
         foreach ($id in $expectedIds) {
             Assert-True ($entries -contains "plugins/SuijinMaterials/Assets/Icons/$id.png") "Release package is missing icon $id.png."
         }
 
         $dllEntries = @($entries | Where-Object { $_ -like '*.dll' })
         Assert-True ($dllEntries.Count -eq 1 -and $dllEntries[0] -eq 'plugins/SuijinMaterials/SuijinMaterials.dll') 'Release package contains an unexpected DLL.'
+        $iconEntries = @($entries | Where-Object { $_ -like 'plugins/SuijinMaterials/Assets/Icons/*.png' })
+        Assert-True ($iconEntries.Count -eq 22) "Release package must contain exactly 22 icons; found $($iconEntries.Count)."
         $runtimeFiles = @($entries | Where-Object { $_ -like 'plugins/SuijinMaterials/*' -and -not $_.EndsWith('/') })
         $unexpectedRuntimeFiles = @($runtimeFiles | Where-Object {
             $_ -ne 'plugins/SuijinMaterials/SuijinMaterials.dll' -and

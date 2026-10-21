@@ -18,12 +18,18 @@ $project = Join-Path $repo 'SuijinMaterials\SuijinMaterials.csproj'
 $plugin = Join-Path $repo 'SuijinMaterials\SuijinMaterialsPlugin.cs'
 $manifest = Join-Path $repo 'SuijinMaterials\Package\manifest.json'
 $backend = Join-Path $repo 'SuijinMaterials\Content\JotunnMaterialRegistrationBackend.cs'
+$lifecycle = Join-Path $repo 'SuijinMaterials\Runtime\PluginLifecycleController.cs'
+$rpc = Join-Path $repo 'SuijinMaterials\World\YggdrasilBranchRpc.cs'
+$branchInstaller = Join-Path $repo 'SuijinMaterials\World\YggdrasilBranchInstaller.cs'
+$acquisitionCatalog = Join-Path $repo 'SuijinMaterials\Acquisition\AcquisitionCatalog.cs'
 
 Assert-True (Test-Path -LiteralPath $solution) 'SuijinMaterials.sln must exist.'
 Assert-True (Test-Path -LiteralPath $project) 'SuijinMaterials.csproj must exist.'
 Assert-True (Test-Path -LiteralPath $plugin) 'SuijinMaterialsPlugin.cs must exist.'
 Assert-True (Test-Path -LiteralPath $manifest) 'Thunderstore manifest must exist.'
 Assert-True (Test-Path -LiteralPath $backend) 'Jotunn material registration backend must exist.'
+Assert-True (Test-Path -LiteralPath $lifecycle) 'Hardened plugin lifecycle controller must exist.'
+Assert-True (Test-Path -LiteralPath $rpc) 'Owner-authoritative Yggdrasil Branch RPC must exist.'
 
 $legacyPaths = @(Get-ChildItem -LiteralPath $repo -Recurse -Force -ErrorAction SilentlyContinue |
     Where-Object { $_.FullName -notlike '*\.git\*' -and $_.Name -like '*JotunnModStub*' })
@@ -43,16 +49,33 @@ if (Test-Path -LiteralPath $project) {
 if (Test-Path -LiteralPath $manifest) {
     $package = Get-Content -Raw -LiteralPath $manifest | ConvertFrom-Json
     Assert-Equal $package.name 'SuijinMaterials' 'Package name must match the mod.'
-    Assert-Equal $package.version_number '0.3.0' 'Package version must match the plugin.'
+    Assert-Equal $package.version_number '0.5.0' 'Package version must match the plugin.'
     Assert-True ($package.dependencies -contains 'denikson-BepInExPack_Valheim-5.4.2351') 'Manifest must pin BepInEx 5.4.2351.'
     Assert-True ($package.dependencies -contains 'ValheimModding-Jotunn-2.30.2') 'Manifest must pin Jotunn 2.30.2.'
 }
 
 if (Test-Path -LiteralPath $plugin) {
     $pluginSource = Get-Content -Raw -LiteralPath $plugin
-    Assert-True ($pluginSource -match 'PluginVersion\s*=\s*"0\.3\.0"') 'Plugin version must be 0.3.0.'
-    Assert-True ($pluginSource -match 'MerchantStockCoordinator') 'Plugin must activate merchant stock.'
-    Assert-True ($pluginSource -match 'WorldMaterialCoordinator') 'Plugin must activate world materials.'
+    Assert-True ($pluginSource -match 'PluginVersion\s*=\s*"0\.5\.0"') 'Plugin version must be 0.5.0.'
+    Assert-True ($pluginSource -match 'PluginLifecycleController') 'Plugin must delegate activation to the hardened lifecycle controller.'
+}
+
+if (Test-Path -LiteralPath $rpc) {
+    $rpcSource = Get-Content -Raw -LiteralPath $rpc
+    Assert-True ($rpcSource -match 'praeto\.suijin\.v05\.branch\.harvest') 'Branch RPC name must match the v0.5 wire contract.'
+}
+
+if (Test-Path -LiteralPath $branchInstaller) {
+    $installerSource = Get-Content -Raw -LiteralPath $branchInstaller
+    Assert-True ($installerSource -match 'praeto\.suijin\.v03\.branch\.') 'The v0.3 branch ZDO prefix must remain stable for save compatibility.'
+}
+
+if (Test-Path -LiteralPath $acquisitionCatalog) {
+    $catalogSource = Get-Content -Raw -LiteralPath $acquisitionCatalog
+    $disabledFeatherIds = @('gull-feather-disabled', 'crow-feather-disabled', 'ash-crow-feather-disabled', 'munin-feather-disabled')
+    foreach ($id in $disabledFeatherIds) {
+        Assert-True ($catalogSource -match [regex]::Escape($id)) "Disabled feather rule is missing: $id."
+    }
 }
 
 if (Test-Path -LiteralPath $backend) {
